@@ -1,18 +1,22 @@
 #include <Arduino.h>
+#include <ESP8266WiFi.h>
+#include <espnow.h>
 
-// put function declarations here:
-int myFunction(int, int);
+int data = 123;
+uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(9600);
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  
+  if(esp_now_init() != 0){
+    Serial.println("ESP-NOW initialization failed.");
+    while (true);
+  }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  esp_now_send(broadcastAddress, (uint8_t *)&data, sizeof(data));
+  delay(2000);
 }
