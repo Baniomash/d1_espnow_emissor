@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For MPU
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+MPU	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+# MPU methods
+initialize KEYWORD2
+readAccelerometerXAxis	KEYWORD2
+readAccelerometerYAxis	KEYWORD2
+readAccelerometerZAxis	KEYWORD2
+readAccelerometer	KEYWORD2
+readTemperature	KEYWORD2
+readGyroscopeXAxis	KEYWORD2
+readGyroscopeYAxis	KEYWORD2
+readGyroscopeZAxis	KEYWORD2
+readGyroscope	KEYWORD2
+disableAccelerometer	KEYWORD2
+disableTemperature	KEYWORD2
+disableGyroscope	KEYWORD2
+enableInterruption	KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
