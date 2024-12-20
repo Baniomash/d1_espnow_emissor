@@ -2,8 +2,10 @@
 #include <ESP8266WiFi.h>
 #include <espnow.h>
 #include <MPU.h>
+#include "gpio.h"
+#include "user_interface.h"
 
-#define INTERRUPTION_PIN 5 // D6
+#define INTERRUPTION_PIN 5 // D1 = 5; D6 = 12; TX = 1
 #define SDA_PIN 0 // D4
 #define SCL_PIN 2 // D5
 
@@ -16,22 +18,17 @@
 
 MPU motionSensor;
 
-// REPLACE WITH RECEIVER MAC Address
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-// Structure example to send data
-// Must match the receiver structure
 typedef struct struct_message {
   uint8_t move;
 } struct_message;
 
-// Create a struct_message called myData
 struct_message myData;
 
 unsigned long lastTime = 0;  
-unsigned long timerDelay = 2000;  // send readings timer
+unsigned long timerDelay = 2000;
 
-// Callback when data is sent
 // void OnDataSent(uint8_t *mac_addr, uint8_t sendStatus) {
 //   Serial.print("Last Packet Send Status: ");
 //   if (sendStatus == 0){
@@ -41,56 +38,7 @@ unsigned long timerDelay = 2000;  // send readings timer
 //     Serial.println("Delivery fail");
 //   }
 // }
- 
-void sleep()
-{
-//  attachInterrupt(digitalPinToInterrupt(INTERRUPTION_PIN), wake, HIGH);
-//  esp_deep_sleep_enable_gpio_wakeup(1ULL << INTERRUPTION_PIN,ESP_GPIO_WAKEUP_GPIO_HIGH);
-//  esp_deep_sleep_start();
-  // ESP.deepSleep(0);
-}
 
-unsigned char verifyMovement()
-{
-  short int xAxis = 0;
-  short int yAxis = 0;
-  short int zAxis = 0;
-
-  motionSensor.readAccelerometer(&xAxis, &yAxis, &zAxis);
-  
-  if (yAxis < -5000)
-  {
-    // Serial.println("Cima");
-    return UP;
-  }
-  else if (zAxis > 5000)
-  {
-    // Serial.println("Direita");
-    return RIGHT;
-  }
-  else if (yAxis > 5000)
-  {
-    if (yAxis < 15000)
-    {
-      // Serial.println("Baixo");
-      return DOWN;
-    }
-    else
-    {
-      // Serial.println("Sleep!");
-      return SLEEP;
-    }
-  }
-  else if (zAxis < -5000)
-  {
-    // Serial.println("Esquerda");
-    return LEFT;
-  }
-  else
-  {
-    return NEUTRAL;
-  }
-}
 
 void wait(unsigned long milliseconds)
 {
@@ -103,25 +51,88 @@ void wait(unsigned long milliseconds)
   }
 }
 
-void setup() {
-  pinMode(INTERRUPTION_PIN, INPUT);
+// void IRAM_ATTR wake() {
+//   Serial.println("Waking up!");
+//   wait(200);
+// }
+
+// void light_sleep(){
+//   wifi_set_opmode(NULL_MODE);
+//   wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
+//   wifi_fpm_open();
+//   gpio_pin_wakeup_enable(GPIO_ID_PIN(INTERRUPTION_PIN), GPIO_PIN_INTR_LOLEVEL);
+//   wifi_fpm_do_sleep(0xFFFFFFF);
+//  }
+
+void deep_sleep(){
+  // attachInterrupt(digitalPinToInterrupt(INTERRUPTION_PIN), wake, HIGH);
+  // esp_deep_sleep_start();
+  ESP.deepSleep(0);
+}
+
+
+unsigned char verifyMovement()
+{
+  short int xAxis = 0;
+  short int yAxis = 0;
+  short int zAxis = 0;
+
+  motionSensor.readAccelerometer(&xAxis, &yAxis, &zAxis);
   
+  if (yAxis < -5000)
+  {
+    Serial.println("Cima");
+    return UP;
+  }
+  else if (zAxis > 5000)
+  {
+    Serial.println("Direita");
+    return RIGHT;
+  }
+  else if (yAxis > 5000)
+  {
+    if (yAxis < 15000)
+    {
+      Serial.println("Baixo");
+      return DOWN;
+    }
+    else
+    {
+      Serial.println("Sleep!");
+      return SLEEP;
+    }
+  }
+  else if (zAxis < -5000)
+  {
+    Serial.println("Esquerda");
+    return LEFT;
+  }
+  else
+  {
+    return NEUTRAL;
+  }
+}
+
+void setup() {
+  // pinMode(INTERRUPTION_PIN, INPUT);
+  
+  gpio_init();
 
   motionSensor.initialize(SDA_PIN, SCL_PIN);
 
   motionSensor.disableTemperature();
-  motionSensor.disableGyroscope();
 
   motionSensor.enableInterruption();
-  // Serial.begin(115200);
+
+  Serial.begin(115200);
  
   // Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
+  // WiFi.disconnect();
 
   // Init ESP-NOW
   if (esp_now_init() != 0) {
-    // Serial.println("Error initializing ESP-NOW");
+    Serial.println("Error initializing ESP-NOW");
     return;
   }
 
@@ -132,6 +143,7 @@ void setup() {
   
   // Register peer
   esp_now_add_peer(broadcastAddress, ESP_NOW_ROLE_SLAVE, 1, NULL, 0);
+
 }
  
 void loop() {
@@ -164,8 +176,7 @@ void loop() {
       {
         if (movementPerformed == SLEEP)
         {
-          sleep();
-          // break;
+          deep_sleep();
         }
         else
         {

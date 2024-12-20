@@ -1,0 +1,26 @@
+{
+	"folders": [
+		{
+			"path": "../../conteoodo/site"
+		},
+		{
+			"name": "d1_espnow_emissor",
+			"path": "."
+		},
+		{
+			"name": "d1_espnow_receptor",
+			"path": "../d1_espnow_receptor"
+		},
+		{
+			"name": "d1_wifi_emissor_rest_api",
+			"path": "../d1_wifi_emissor_rest_api"
+		}
+	],
+	"settings": {
+		"i18n-ally.sourceLanguage": "pt-BR",
+		"i18n-ally.keystyle": "nested",
+		"i18n-ally.localesPaths": [
+			"locales"
+		]
+	}
+}

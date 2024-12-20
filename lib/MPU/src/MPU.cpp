@@ -102,6 +102,7 @@ void MPU::disableGyroscope()
 void MPU::enableInterruption()
 {
     changeRegister(MOT_THR_REGISTER, 0b00000001);
-    changeRegister(MOT_DUR_REGISTER, 0b00000001);
+    changeRegister(MOT_DUR_REGISTER, 0b01000011);
     changeRegister(INT_ENABLE_REGISTER, 0b01000000);
+    // changeRegister(INT_PIN_CFG_REGISTER, 0b10000000);
 }
