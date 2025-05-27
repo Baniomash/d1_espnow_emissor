@@ -21,7 +21,7 @@ MPU motionSensor;
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 typedef struct struct_message {
-  uint8_t move;
+  int move;
 } struct_message;
 
 struct_message myData;
@@ -64,11 +64,11 @@ void wait(unsigned long milliseconds)
 //   wifi_fpm_do_sleep(0xFFFFFFF);
 //  }
 
-void deep_sleep(){
-  // attachInterrupt(digitalPinToInterrupt(INTERRUPTION_PIN), wake, HIGH);
-  // esp_deep_sleep_start();
-  ESP.deepSleep(0);
-}
+// void deep_sleep(){
+//   // attachInterrupt(digitalPinToInterrupt(INTERRUPTION_PIN), wake, HIGH);
+//   // esp_deep_sleep_start();
+//   ESP.deepSleep(0);
+// }
 
 
 unsigned char verifyMovement()
@@ -86,8 +86,8 @@ unsigned char verifyMovement()
   }
   else if (zAxis > 5000)
   {
-    Serial.println("Direita");
-    return RIGHT;
+    Serial.println("Esquerda");
+    return LEFT;
   }
   else if (yAxis > 5000)
   {
@@ -104,11 +104,15 @@ unsigned char verifyMovement()
   }
   else if (zAxis < -5000)
   {
-    Serial.println("Esquerda");
-    return LEFT;
+    Serial.println("Direita");
+    return RIGHT;
   }
   else
   {
+    // Serial.println("Neutro");
+    // Serial.println(zAxis);
+    // Serial.println(xAxis);
+    // Serial.println(yAxis);
     return NEUTRAL;
   }
 }
@@ -122,7 +126,7 @@ void setup() {
 
   motionSensor.disableTemperature();
 
-  motionSensor.enableInterruption();
+  // motionSensor.enableInterruption();
 
   Serial.begin(115200);
  
@@ -160,7 +164,8 @@ void loop() {
     {
       myData.move = movementsSequence;
       esp_now_send(broadcastAddress, (uint8_t *) &myData, sizeof(myData));
-      Serial.println("Enviado!");
+      Serial.print("Enviado!");
+      Serial.println(movementsSequence);
 
       movementsSequence -= movementPerformed;
       movementsSequence /= 10;
@@ -176,7 +181,10 @@ void loop() {
       {
         if (movementPerformed == SLEEP)
         {
-          deep_sleep();
+          // light_sleep();
+          // deep_sleep();
+          // wait(500);
+          // wake();
         }
         else
         {
